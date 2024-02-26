@@ -1,0 +1,125 @@
+---
+title: "TUTORIAL"
+output: html_document
+---
+
+```{r}
+library(nycflights13)
+library(tidyverse)
+
+```
+
+```{r}
+data("flights")
+flights
+```
+
+```{r}
+head(flights, 5)
+tail(flights, 5)
+
+colnames(flights)
+nrow(flights)
+ncol(flights)
+```
+
+```{r}
+data1 <- flights%>%select(year, month, dep_time, dep_delay, arr_time, sched_dep_time )
+
+data1
+data2 <- data1%>%select(-arr_time)
+data2
+
+```
+
+```{r}
+data3 <- data2%>%filter(month !="9")
+tail (data3
+)
+data3 <-data2%>%filter(month == c("1", "2"))
+head (data3, 5)
+
+data3 <-data2%>%filter(month == c("1", "2") & dep_delay=="2")
+```
+
+
+```{r}
+summary(data2$dep_time)
+
+delayed <- data2%>%filter(dep_time>1349)
+
+```
+
+```{r}
+data4 <- data2%>%mutate(month = factor(month, labels = c("Jan", "Feb", "March", "April", "May", "June", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec")))
+
+data4
+summary(data4$month)
+```
+
+```{r}
+data5 <- data4%>%mutate(Delayed_cat =ifelse(dep_time>1349, "Delayed", "Not delayed"))
+
+data5
+summary(factor(data5$Delayed_cat))
+
+```
+
+```{r}
+summary(data5$dep_time)
+
+data5$Delayed_cat2 <- cut(data5$dep_time, c(1,907,1401,1744,2400))
+
+data5 <- data5%>%mutate(Delayed_cat2 = factor(Delayed_cat2, labels = c("Q1", "Q2", "Q3", "Q4")))
+
+summary (data5$Delayed_cat2)
+
+```
+
+```{r}
+
+tab1 <- data.frame(table(data5$Delayed_cat2))
+
+colnames(tab1)[1] <- "Ranges"
+colnames(tab1)[2] <- "Count"
+
+tab1
+
+```
+
+```{r}
+ggplot(data = tab1, aes(x= Ranges, y =Count))+geom_bar(stat = "identity", fill = c ("red", "maroon", "black", "orange"))+theme_classic() +labs(x = "Ranges", y="Number of hours", title = "A bar graph showing delay categories")+geom_text( aes(label = Count, hjust = 0.5, vjust= -0.2))
+
+```
+
+```{r}
+data6 <- data5%>%group_by(month)%>%summarise(av.dep.time = mean(dep_time, na.rm = T))
+
+data6
+
+```
+
+```{r}
+pl <- ggplot(data = data6, aes(x= month, y= av.dep.time, fill = month))+geom_bar(stat= "identity", position = "dodge")+labs (title = "A bar graph of months vs av depature time", x = "months", y= "Average Depature Time", fill = "Months")
+print(pl)
+
+```
+
+```{r}
+ggplot(data = data5, aes(x = dep_time, y= sched_dep_time))+geom_point(aes(color = Delayed_cat2, shape = Delayed_cat2))
+
+```
+
+```{r}
+ data7 <- data5%>%filter(month%in%c("Jan", "Dec"), Delayed_cat%in%c("Not delayed"))%>%group_by(Delayed_cat2)%>%summarise(frequency =n())
+
+data7
+
+```
+
+```{r}
+ data7 <- data5%>%filter(month%in%c("Jan", "Dec"), Delayed_cat%in%c("Delayed"))
+
+data7
+
+```
